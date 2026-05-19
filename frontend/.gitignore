@@ -1,0 +1,27 @@
+# Logi i debugi
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Foldery zależności (blokuje node_modules wszędzie: w root, frontend i backend)
+node_modules/
+
+# Zmienne środowiskowe i sekrety (blokuje każdy plik .env w projekcie)
+.env
+*.env.local
+.env.*
+
+# Pliki produkcyjne / kompilacja
+dist/
+dist-ssr/
+
+# Edytory kodu i systemowe
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Specyficzne dla bazy danych (jeśli testowałbyś coś lokalnie)
+.mongo/
