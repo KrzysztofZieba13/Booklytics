@@ -8,9 +8,13 @@ const PORT = process.env.PORT || 5000;
 
 // Middlewares
 app.use(cors());
-app.use(express.json()); // Pozwala Expressowi czytać dane w formacie JSON (req.body)
+app.use(express.json());
 
-// Podstawowy endpoint testowy (Sprawdzisz go w przeglądarce)
+const serviceRoutes = require('./routes/serviceRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+app.use('/api/services', serviceRoutes);
+app.use('/api/bookings', bookingRoutes);
+
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Serwer działa poprawnie!' });
 });
