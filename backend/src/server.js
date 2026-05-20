@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+require('./models/User');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -12,8 +14,11 @@ app.use(express.json());
 
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const businessRoutes = require('./routes/businessRoutes');
+
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/businesses', businessRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Serwer działa poprawnie!' });
