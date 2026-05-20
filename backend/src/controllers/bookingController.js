@@ -59,6 +59,37 @@ const lockDateTimeSlot = async (req, res) => {
     }
 };
 
+// @desc    Potwierdź rezerwację (Zdejmij blokadę TTL i zapisz na stałe)
+// @route   PATCH /api/bookings/confirm/:bookingId
+const confirmBooking = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            return res.status(404).json({ message: 'Nie znaleziono takiej rezerwacji.' });
+        }
+
+        if (booking.status !== 'temporary_lock') {
+            return res.status(400).json({ message: 'Ta rezerwacja nie może zostać potwierdzona (ma już status: ' + booking.status + ')' });
+        }
+
+        booking.status = 'confirmed';
+        booking.expiresAt = undefined;
+
+        await booking.save();
+
+        res.status(200).json({
+            message: 'Rezerwacja została pomyślnie potwierdzona i zapisana w kalendarzu!',
+            booking
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera przy potwierdzaniu rezerwacji', error: error.message });
+    }
+};
+
 module.exports = {
-    lockDateTimeSlot
+    lockDateTimeSlot,
+    confirmBooking
 };
