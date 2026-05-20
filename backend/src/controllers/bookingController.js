@@ -89,7 +89,71 @@ const confirmBooking = async (req, res) => {
     }
 };
 
+// @desc    Pobierz wolne sloty godzinowe dla pracownika na dany dzień
+// @route   GET /api/bookings/available-slots
+const getAvailableSlots = async (req, res) => {
+    try {
+        const { employeeId, serviceId, date } = req.query; // np. ?employeeId=...&serviceId=...&date=2026-06-01
+
+        if (!employeeId || !serviceId || !date) {
+            return res.status(400).json({ message: 'Parametry employeeId, serviceId i date są wymagane.' });
+        }
+
+        const service = await Service.findById(serviceId);
+        if (!service) return res.status(404).json({ message: 'Nie znaleziono usługi.' });
+        const serviceDuration = service.duration;
+
+        const workStartHour = 8;
+        const workEndHour = 16;
+        const slotInterval = 30;
+
+        const startOfDay = new Date(`${date}T00:00:00.000Z`);
+        const endOfDay = new Date(`${date}T23:59:59.999Z`);
+
+        const existingBookings = await Booking.find({
+            employeeId,
+            status: { $in: ['temporary_lock', 'confirmed'] },
+            startTime: { $gte: startOfDay, $lte: endOfDay }
+        });
+
+        const availableSlots = [];
+        let currentSlotTime = new Date(startOfDay);
+        currentSlotTime.setUTCHours(workStartHour, 0, 0, 0);
+
+        const endTimeLimit = new Date(startOfDay);
+        endTimeLimit.setUTCHours(workEndHour, 0, 0, 0);
+
+        while (currentSlotTime < endTimeLimit) {
+            const slotStart = new Date(currentSlotTime);
+            const slotEnd = new Date(slotStart.getTime() + serviceDuration * 60000);
+
+            const isOvelapping = existingBookings.some(booking => {
+                return (
+                    (slotStart >= booking.startTime && slotStart < booking.endTime) ||
+                    (slotEnd > booking.startTime && slotEnd <= booking.endTime) ||
+                    (slotStart <= booking.startTime && slotEnd >= booking.endTime)
+                );
+            });
+
+            if (!isOvelapping && slotEnd <= endTimeLimit) {
+                availableSlots.push({
+                    time: slotStart.toISOString().substring(11, 16),
+                    dateTime: slotStart
+                });
+            }
+
+            currentSlotTime.setMinutes(currentSlotTime.getMinutes() + slotInterval);
+        }
+
+        res.status(200).json(availableSlots);
+
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd przy wyliczaniu wolnych slotów', error: error.message });
+    }
+};
+
 module.exports = {
     lockDateTimeSlot,
-    confirmBooking
+    confirmBooking,
+    getAvailableSlots
 };
