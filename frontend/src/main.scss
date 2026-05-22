@@ -1,0 +1,32 @@
+$primary: #10b981;
+$dark: #0f172a;
+$light: #f8fafc;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: $light;
+  color: $dark;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.app-container {
+  text-align: center;
+  padding: 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  
+  h1 {
+    color: $primary;
+    margin-bottom: 1rem;
+  }
+}
