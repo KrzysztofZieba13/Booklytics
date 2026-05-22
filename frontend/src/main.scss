@@ -1,92 +1,11 @@
-@use 'sass:color';
+// 1. Zmienne i ustawienia abstrakcyjne
+@forward 'styles/abstract/variables';
 
-$primary: #10b981;
-$dark: #0f172a;
-$light: #f8fafc;
+// 2. Style bazowe i globalne
+@use 'styles/base/reset';
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+// 3. Style komponentów wielokrotnego użytku
+@use 'styles/components/navbar';
 
-body {
-  background-color: $light;
-  color: $dark;
-  min-height: 100vh;
-}
-
-.app-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-// Style paska nawigacji
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: white;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-
-  .nav-logo a {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: $primary;
-    text-decoration: none;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 1.5rem;
-    
-    a {
-      text-decoration: none;
-      color: #64748b;
-      font-weight: 500;
-      transition: color 0.2s;
-
-      &:hover {
-        color: $primary;
-      }
-    }
-  }
-}
-
-// Główny kontener na treść podstron
-.main-container {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.page-content {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
-  
-  h2 {
-    margin-bottom: 0.5rem;
-  }
-}
-
-.btn-nav-login {
-  background-color: $primary;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background-color: color.adjust($primary, $lightness: -10%);
-  }
-}
+// 4. Style konkretnych podstron
+@use 'styles/pages/home';

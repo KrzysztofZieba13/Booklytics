@@ -1,0 +1,49 @@
+@use '../abstract/variables' as *;
+@use 'sass:color';
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+
+  .nav-logo a {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $primary;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+    
+    a {
+      text-decoration: none;
+      color: #64748b;
+      font-weight: 500;
+      transition: color 0.2s;
+
+      &:hover {
+        color: $primary;
+      }
+    }
+  }
+}
+
+.btn-nav-login {
+  background-color: $primary;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: color.adjust($primary, $lightness: -10%);
+  }
+}

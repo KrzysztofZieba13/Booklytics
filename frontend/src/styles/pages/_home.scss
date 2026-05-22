@@ -1,0 +1,106 @@
+@use '../abstract/variables' as *;
+@use 'sass:color';
+
+.home-page {
+  .home-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    
+    h2 {
+      font-size: 2rem;
+      color: $dark;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: #64748b;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.status-msg {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-top: 2rem;
+
+  &.error-msg {
+    color: #ef4444;
+  }
+}
+
+.business-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.business-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+
+  h3 {
+    margin: 0.75rem 0 0.5rem 0;
+    font-size: 1.3rem;
+    color: $dark;
+  }
+
+  .address {
+    color: #475569;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .owner {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-view {
+    margin-top: auto;
+    background-color: $primary;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background 0.2s;
+
+    &:hover {
+      background-color: color.adjust($primary, $lightness: -8%);
+    }
+  }
+}
+
+.category-badge {
+  align-self: flex-start;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  color: #475569;
+
+  &.beauty {
+    background-color: #fce7f3;
+    color: #db2777;
+  }
+  &.automotive {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+}
