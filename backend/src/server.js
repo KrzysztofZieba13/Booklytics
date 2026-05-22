@@ -15,10 +15,12 @@ app.use(express.json());
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const businessRoutes = require('./routes/businessRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/businesses', businessRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', message: 'Serwer działa poprawnie!' });
