@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import BusinessProfile from './pages/BusinessProfile';
 import AdminDashboard from './pages/AdminDashboard';
+import EmployeeDashboard from './pages/EmployeeDashboard';
+import MyBookings from './pages/MyBookings';
 import Summary from './pages/Summary';
 import './main.scss';
 
@@ -19,6 +21,8 @@ function App(): React.JSX.Element {
             <Route path="/business/:id" element={<BusinessProfile />} />
             <Route path="/summary/:bookingId" element={<Summary />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/employee" element={<EmployeeDashboard />} />
+            <Route path="/my-bookings" element={<MyBookings />} />
           </Routes>
         </main>
       </div>

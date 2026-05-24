@@ -11,7 +11,7 @@ const handleClerkWebhook = async (req, res) => {
             return res.status(500).json({ message: 'Brak klucza CLERK_WEBHOOK_SECRET w pliku .env' });
         }
 
-        const payload = JSON.stringify(req.body);
+        const payload = Buffer.isBuffer(req.body) ? req.body.toString() : JSON.stringify(req.body);
         const headers = req.headers;
         const svix_id = headers['svix-id'];
         const svix_timestamp = headers['svix-timestamp'];
@@ -73,4 +73,53 @@ const handleClerkWebhook = async (req, res) => {
     }
 };
 
-module.exports = { handleClerkWebhook };
+// @desc    Pobierz użytkownika po clerkId
+// @route   GET /api/users/by-clerk/:clerkId
+const getUserByClerkId = async (req, res) => {
+    try {
+        const user = await User.findOne({ clerkId: req.params.clerkId }).select('-__v');
+        if (!user) return res.status(404).json({ message: 'Użytkownik nie znaleziony' });
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera', error: error.message });
+    }
+};
+
+// @desc    Pobierz wszystkich użytkowników
+// @route   GET /api/users
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select('-__v');
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera przy pobieraniu użytkowników', error: error.message });
+    }
+};
+
+// @desc    Zmień rolę użytkownika
+// @route   PATCH /api/users/:id/role
+const updateUserRole = async (req, res) => {
+    try {
+        const { role } = req.body;
+
+        if (!['client', 'employee', 'admin'].includes(role)) {
+            return res.status(400).json({ message: 'Nieprawidłowa rola. Dozwolone: client, employee, admin' });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { role },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'Użytkownik nie istnieje' });
+        }
+
+        res.status(200).json({ message: 'Rola zaktualizowana', user });
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera przy zmianie roli', error: error.message });
+    }
+};
+
+module.exports = { handleClerkWebhook, getUserByClerkId, getAllUsers, updateUserRole };

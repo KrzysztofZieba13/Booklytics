@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 
 function Summary(): React.JSX.Element {
   const { bookingId } = useParams<{ bookingId: string }>();
@@ -51,14 +52,15 @@ function Summary(): React.JSX.Element {
 
           {error && <p style={{ color: '#ef4444', marginBottom: '1rem', fontWeight: 600 }}>❌ {error}</p>}
 
-          <button 
-            className="btn-primary" 
-            style={{ width: '100%', padding: '1rem' }}
+          <Button
+            variant="primary"
+            size="lg"
+            style={{ width: '100%' }}
             onClick={handleConfirmBooking}
             disabled={loading}
           >
-            {loading ? 'Zapisywanie w bazie...' : 'Potwierdzam rezerwację na stałe'}
-          </button>
+            {loading ? 'Zapisywanie...' : 'Potwierdzam rezerwację na stałe'}
+          </Button>
         </>
       ) : (
         <div className="success-box">
@@ -67,9 +69,9 @@ function Summary(): React.JSX.Element {
           <p style={{ color: '#64748b', margin: '1rem 0 2rem 0' }}>
             Termin został pomyślnie zapisany w kalendarzu. Usługodawca został powiadomiony o Twojej wizycie.
           </p>
-          <button className="btn-primary" onClick={() => navigate('/')}>
+          <Button variant="primary" size="lg" style={{ width: '100%' }} onClick={() => navigate('/')}>
             Wróć do strony głównej
-          </button>
+          </Button>
         </div>
       )}
     </div>

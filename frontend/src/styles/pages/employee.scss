@@ -1,0 +1,255 @@
+@use '../abstract/variables' as *;
+@use 'sass:color';
+
+.employee-section {
+  margin-top: 2rem;
+
+  h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+}
+
+.empty-msg {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.business-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    background: white;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+
+    &:hover { background: #f8fafc; }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      strong { color: $dark; }
+      span { font-size: 0.85rem; color: #64748b; }
+    }
+  }
+
+  &__toggle { color: #94a3b8; font-size: 0.8rem; }
+
+  &__body {
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+}
+
+.panel-subsection {
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.hours-form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #475569;
+
+    input {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      background: white;
+      &:focus { border-color: $primary; }
+    }
+  }
+}
+
+.duration-control {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #475569;
+
+  strong { min-width: 60px; text-align: center; color: $dark; }
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    strong { font-size: 0.95rem; color: $dark; }
+    span { font-size: 0.8rem; color: #94a3b8; }
+  }
+
+  &__meta {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.business-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1.25rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  max-width: 480px;
+
+  input, select {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    background: white;
+
+    &:focus { border-color: $primary; }
+  }
+}
+
+.form-error {
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.business-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+
+  strong { color: $dark; }
+  span { font-size: 0.85rem; color: #64748b; }
+}
+
+.booking-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.07);
+  }
+
+  &--completed {
+    opacity: 0.55;
+  }
+
+  &__time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+  }
+
+  &__date {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: capitalize;
+  }
+
+  &__hours {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $dark;
+    margin-top: 0.2rem;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    strong {
+      font-size: 1rem;
+      color: $dark;
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: #475569;
+    }
+  }
+
+  &__meta {
+    font-size: 0.8rem !important;
+    color: #94a3b8 !important;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+  }
+
+  &__done {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: $primary;
+  }
+}

@@ -6,7 +6,9 @@
 
 // 3. Style komponentów wielokrotnego użytku
 @use 'styles/components/navbar';
+@use 'styles/components/button';
 
 // 4. Style konkretnych podstron
 @use 'styles/pages/home';
 @use 'styles/pages/business';
+@use 'styles/pages/employee';

@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { createService, getBusinessServices } = require('../controllers/serviceController');
 
-//const { protectRoute, authorizeRoles } = require('../middleware/authMiddleware');
+const { protectRoute, authorizeRoles } = require('../middleware/authMiddleware');
 
-router.post('/', createService);
+router.post('/', protectRoute, authorizeRoles('employee'), createService);
 router.get('/business/:businessId', getBusinessServices);
 
 module.exports = router;

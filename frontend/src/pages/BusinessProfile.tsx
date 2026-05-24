@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 
 interface Service {
   _id: string;
@@ -7,6 +8,13 @@ interface Service {
   description: string;
   price: number;
   duration: number;
+}
+
+interface Business {
+  _id: string;
+  name: string;
+  ownerId: { _id: string; firstName: string; lastName: string };
+  openingHours: { open: string; close: string };
 }
 
 interface AvailableSlot {
@@ -17,101 +25,91 @@ interface AvailableSlot {
 function BusinessProfile(): React.JSX.Element {
   const { id: businessId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  // Stany dla danych z API
+  const { user, isSignedIn } = useUser();
+
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [clientMongoId, setClientMongoId] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
-
-  // Stany wyboru użytkownika
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  
-  // Stany pomocnicze
   const [loadingSlots, setLoadingSlots] = useState<boolean>(false);
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
 
+  const today = new Date().toISOString().split('T')[0];
+
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/services/business/${businessId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setServices(data);
-        }
-      } catch (err) {
-        console.error('Błąd pobierania usług:', err);
-      }
-    };
-    if (businessId) fetchServices();
+    if (!businessId) return;
+    Promise.all([
+      fetch(`http://localhost:5000/api/businesses/${businessId}`).then((r) => r.json()),
+      fetch(`http://localhost:5000/api/services/business/${businessId}`).then((r) => r.json()),
+    ]).then(([biz, svcs]) => {
+      setBusiness(biz);
+      setServices(svcs);
+    });
   }, [businessId]);
 
   useEffect(() => {
-    const fetchAvailableSlots = async () => {
-      if (!selectedService || !selectedDate) return;
-      
-      try {
-        setLoadingSlots(true);
-        setBookingMessage(null);
-        const employeeId = "60d5ecb8b394d01428238411"; 
-        
-        const response = await fetch(
-          `http://localhost:5000/api/bookings/available-slots?employeeId=${employeeId}&serviceId=${selectedService._id}&date=${selectedDate}`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          setAvailableSlots(data);
-        }
-      } catch (err) {
-        console.error('Błąd pobierania slotów:', err);
-      } finally {
-        setLoadingSlots(false);
-      }
-    };
+    if (!isSignedIn || !user) return;
+    fetch(`http://localhost:5000/api/users/by-clerk/${user.id}`)
+      .then((r) => r.json())
+      .then((data) => setClientMongoId(data._id));
+  }, [isSignedIn, user]);
 
-    fetchAvailableSlots();
-  }, [selectedService, selectedDate]);
+  useEffect(() => {
+    if (!selectedService || !selectedDate || !business) return;
+    setLoadingSlots(true);
+    setBookingMessage(null);
+    const employeeId = business.ownerId._id;
+    fetch(`http://localhost:5000/api/bookings/available-slots?employeeId=${employeeId}&serviceId=${selectedService._id}&date=${selectedDate}`)
+      .then((r) => r.json())
+      .then((data) => { setAvailableSlots(data); setLoadingSlots(false); })
+      .catch(() => setLoadingSlots(false));
+  }, [selectedService, selectedDate, business]);
 
   const handleBookSlot = async (slotDateTime: string) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/bookings/lock', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          businessId,
-          serviceId: selectedService?._id,
-          clientId: "60d5ecb8b394d01428238499", // Testowy klient
-          employeeId: "60d5ecb8b394d01428238411", // Testowy pracownik
-          startTime: slotDateTime
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate(`/summary/${data.booking._id}`);
-      } else {
-        setBookingMessage(`❌ Błąd: ${data.message}`);
-      }
-    } catch (err) {
-      setBookingMessage('❌ Błąd połączenia z serwerem.');
+    if (!isSignedIn) {
+      setBookingMessage('Musisz być zalogowany, aby zarezerwować wizytę.');
+      return;
+    }
+    if (!clientMongoId) {
+      setBookingMessage('Nie znaleziono Twojego konta. Spróbuj ponownie.');
+      return;
+    }
+    const res = await fetch('http://localhost:5000/api/bookings/lock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessId,
+        serviceId: selectedService?._id,
+        clientId: clientMongoId,
+        employeeId: business?.ownerId._id,
+        startTime: slotDateTime,
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      navigate(`/summary/${data.booking._id}`);
+    } else {
+      setBookingMessage(`Błąd: ${data.message}`);
     }
   };
 
-return (
+  return (
     <div className="business-profile-page">
-      <h2>Zarezerwuj wizytę</h2>
+      <h2>Zarezerwuj wizytę{business ? ` — ${business.name}` : ''}</h2>
       <p className="subtitle">Wybierz interesującą Cię usługę oraz dogodny termin.</p>
 
       <div className="booking-container">
-        {/* KROK A: Lista usług */}
         <div className="services-section">
           <h3>1. Wybierz usługę</h3>
           <div className="services-list">
-            {services.map(service => (
-              <div 
-                key={service._id} 
+            {services.length === 0 && <p>Brak dostępnych usług.</p>}
+            {services.map((service) => (
+              <div
+                key={service._id}
                 className={`service-selectable-item ${selectedService?._id === service._id ? 'active' : ''}`}
-                onClick={() => setSelectedService(service)}
+                onClick={() => { setSelectedService(service); setAvailableSlots([]); setSelectedDate(''); }}
               >
                 <div>
                   <h4>{service.name}</h4>
@@ -126,40 +124,30 @@ return (
           </div>
         </div>
 
-        {/* KROK B: Kalendarz i Sloty */}
         <div className="datetime-section">
           <h3>2. Wybierz dzień i godzinę</h3>
-          
           <div className="date-picker-box">
             <label>Data wizyty:</label>
-            <input 
-              type="date" 
-              min="2026-05-22" // Blokada na daty przeszłe
-              value={selectedDate} 
+            <input
+              type="date"
+              min={today}
+              value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               disabled={!selectedService}
             />
             {!selectedService && <p className="hint">👈 Najpierw wybierz usługę z listy</p>}
           </div>
 
-          {/* Wyświetlanie godzin */}
           {selectedService && selectedDate && (
             <div className="slots-box">
               <h4>Dostępne godziny na dzień {selectedDate}:</h4>
-              
               {loadingSlots && <p>Obliczanie wolnych terminów...</p>}
-              
               {!loadingSlots && availableSlots.length === 0 && (
-                <p className="no-slots">Brak wolnych miejsc w tym dniu. Wybierz inną datę.</p>
+                <p className="no-slots">Brak wolnych miejsc w tym dniu.</p>
               )}
-
               <div className="slots-grid">
-                {availableSlots.map(slot => (
-                  <button 
-                    key={slot.dateTime} 
-                    className="slot-btn"
-                    onClick={() => handleBookSlot(slot.dateTime)}
-                  >
+                {availableSlots.map((slot) => (
+                  <button key={slot.dateTime} className="slot-btn" onClick={() => handleBookSlot(slot.dateTime)}>
                     {slot.time}
                   </button>
                 ))}
@@ -167,7 +155,6 @@ return (
             </div>
           )}
 
-          {/* Komunikat o statusie rezerwacji */}
           {bookingMessage && <div className="booking-alert">{bookingMessage}</div>}
         </div>
       </div>

@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Service = require('../models/Service');
+const Business = require('../models/Business');
 
 // @desc    Zablokuj termin tymczasowo (Rozpoczęcie procesu rezerwacji)
 // @route   POST /api/bookings/lock
@@ -103,8 +104,9 @@ const getAvailableSlots = async (req, res) => {
         if (!service) return res.status(404).json({ message: 'Nie znaleziono usługi.' });
         const serviceDuration = service.duration;
 
-        const workStartHour = 8;
-        const workEndHour = 16;
+        const business = await Business.findById(service.businessId);
+        const [openH, openM] = (business?.openingHours?.open || '08:00').split(':').map(Number);
+        const [closeH, closeM] = (business?.openingHours?.close || '16:00').split(':').map(Number);
         const slotInterval = 30;
 
         const startOfDay = new Date(`${date}T00:00:00.000Z`);
@@ -118,10 +120,10 @@ const getAvailableSlots = async (req, res) => {
 
         const availableSlots = [];
         let currentSlotTime = new Date(startOfDay);
-        currentSlotTime.setUTCHours(workStartHour, 0, 0, 0);
+        currentSlotTime.setUTCHours(openH, openM, 0, 0);
 
         const endTimeLimit = new Date(startOfDay);
-        endTimeLimit.setUTCHours(workEndHour, 0, 0, 0);
+        endTimeLimit.setUTCHours(closeH, closeM, 0, 0);
 
         while (currentSlotTime < endTimeLimit) {
             const slotStart = new Date(currentSlotTime);
@@ -152,8 +154,61 @@ const getAvailableSlots = async (req, res) => {
     }
 };
 
+// @desc    Pobierz wizyty pracownika
+// @route   GET /api/bookings/employee/:employeeId
+const getEmployeeBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find({
+            employeeId: req.params.employeeId,
+            status: { $in: ['confirmed', 'completed'] }
+        })
+            .populate('serviceId', 'name duration price')
+            .populate('clientId', 'firstName lastName email phoneNumber')
+            .sort({ startTime: 1 });
+
+        res.status(200).json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera przy pobieraniu wizyt', error: error.message });
+    }
+};
+
+// @desc    Oznacz wizytę jako ukończoną
+// @route   PATCH /api/bookings/:bookingId/complete
+const completeBooking = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.bookingId);
+        if (!booking) return res.status(404).json({ message: 'Nie znaleziono rezerwacji.' });
+        if (booking.status !== 'confirmed') {
+            return res.status(400).json({ message: 'Tylko potwierdzone wizyty można oznaczyć jako ukończone.' });
+        }
+        booking.status = 'completed';
+        await booking.save();
+        res.status(200).json({ message: 'Wizyta oznaczona jako ukończona.', booking });
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera', error: error.message });
+    }
+};
+
+// @desc    Pobierz wizyty klienta
+// @route   GET /api/bookings/client/:clientId
+const getClientBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find({ clientId: req.params.clientId })
+            .populate('serviceId', 'name duration price')
+            .populate('employeeId', 'firstName lastName')
+            .populate('businessId', 'name address city')
+            .sort({ startTime: -1 });
+        res.status(200).json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera', error: error.message });
+    }
+};
+
 module.exports = {
     lockDateTimeSlot,
     confirmBooking,
-    getAvailableSlots
+    getAvailableSlots,
+    getEmployeeBookings,
+    completeBooking,
+    getClientBookings
 };
