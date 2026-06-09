@@ -77,10 +77,12 @@ const confirmBooking = async (req, res) => {
         }
 
         booking.status = 'confirmed';
-        booking.expiresAt = undefined;
         if (paymentMethod) booking.paymentMethod = paymentMethod;
 
-        await booking.save();
+        await Booking.updateOne(
+            { _id: booking._id },
+            { $set: { status: booking.status, paymentMethod: booking.paymentMethod }, $unset: { expiresAt: '' } }
+        );
 
         res.status(200).json({
             message: 'Rezerwacja została pomyślnie potwierdzona i zapisana w kalendarzu!',
