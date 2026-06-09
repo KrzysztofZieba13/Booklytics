@@ -36,14 +36,14 @@ function Summary(): React.JSX.Element {
 
   useEffect(() => {
     if (paymentParam === 'success' && bookingId && booking && booking.status === 'temporary_lock') {
-      confirmBooking('online');
+      confirmBooking('card');
     }
     if (booking?.status === 'confirmed') {
       setSuccess(true);
     }
   }, [paymentParam, booking]);
 
-  const confirmBooking = async (paymentMethod: 'online' | 'on_site') => {
+  const confirmBooking = async (paymentMethod: 'card' | 'on_site') => {
     if (!bookingId) return;
     setActionLoading(true);
     setError(null);
