@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import API_URL from '../config';
 
 interface Business {
   _id: string;
@@ -23,7 +24,7 @@ function Home(): React.JSX.Element {
     const fetchBusinesses = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:5000/api/businesses');
+        const response = await fetch(`${API_URL}/api/businesses`);
         
         if (!response.ok) {
           throw new Error('Nie udało się pobrać listy punktów usługowych.');

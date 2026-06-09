@@ -65,6 +65,7 @@ const lockDateTimeSlot = async (req, res) => {
 const confirmBooking = async (req, res) => {
     try {
         const { bookingId } = req.params;
+        const { paymentMethod } = req.body;
 
         const booking = await Booking.findById(bookingId);
         if (!booking) {
@@ -77,6 +78,7 @@ const confirmBooking = async (req, res) => {
 
         booking.status = 'confirmed';
         booking.expiresAt = undefined;
+        if (paymentMethod) booking.paymentMethod = paymentMethod;
 
         await booking.save();
 
@@ -87,6 +89,21 @@ const confirmBooking = async (req, res) => {
 
     } catch (error) {
         res.status(500).json({ message: 'Błąd serwera przy potwierdzaniu rezerwacji', error: error.message });
+    }
+};
+
+// @desc    Pobierz rezerwację po ID
+// @route   GET /api/bookings/:bookingId
+const getBookingById = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.bookingId)
+            .populate('serviceId', 'name duration price')
+            .populate('businessId', 'name address city')
+            .populate('employeeId', 'firstName lastName');
+        if (!booking) return res.status(404).json({ message: 'Nie znaleziono rezerwacji.' });
+        res.status(200).json(booking);
+    } catch (error) {
+        res.status(500).json({ message: 'Błąd serwera', error: error.message });
     }
 };
 
@@ -207,6 +224,7 @@ const getClientBookings = async (req, res) => {
 module.exports = {
     lockDateTimeSlot,
     confirmBooking,
+    getBookingById,
     getAvailableSlots,
     getEmployeeBookings,
     completeBooking,

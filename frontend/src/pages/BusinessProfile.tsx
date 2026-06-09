@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
+import API_URL from '../config';
 
 interface Service {
   _id: string;
@@ -41,8 +42,8 @@ function BusinessProfile(): React.JSX.Element {
   useEffect(() => {
     if (!businessId) return;
     Promise.all([
-      fetch(`http://localhost:5000/api/businesses/${businessId}`).then((r) => r.json()),
-      fetch(`http://localhost:5000/api/services/business/${businessId}`).then((r) => r.json()),
+      fetch(`${API_URL}/api/businesses/${businessId}`).then((r) => r.json()),
+      fetch(`${API_URL}/api/services/business/${businessId}`).then((r) => r.json()),
     ]).then(([biz, svcs]) => {
       setBusiness(biz);
       setServices(svcs);
@@ -51,7 +52,7 @@ function BusinessProfile(): React.JSX.Element {
 
   useEffect(() => {
     if (!isSignedIn || !user) return;
-    fetch(`http://localhost:5000/api/users/by-clerk/${user.id}`)
+    fetch(`${API_URL}/api/users/by-clerk/${user.id}`)
       .then((r) => r.json())
       .then((data) => setClientMongoId(data._id));
   }, [isSignedIn, user]);
@@ -61,7 +62,7 @@ function BusinessProfile(): React.JSX.Element {
     setLoadingSlots(true);
     setBookingMessage(null);
     const employeeId = business.ownerId._id;
-    fetch(`http://localhost:5000/api/bookings/available-slots?employeeId=${employeeId}&serviceId=${selectedService._id}&date=${selectedDate}`)
+    fetch(`${API_URL}/api/bookings/available-slots?employeeId=${employeeId}&serviceId=${selectedService._id}&date=${selectedDate}`)
       .then((r) => r.json())
       .then((data) => { setAvailableSlots(data); setLoadingSlots(false); })
       .catch(() => setLoadingSlots(false));
@@ -76,7 +77,7 @@ function BusinessProfile(): React.JSX.Element {
       setBookingMessage('Nie znaleziono Twojego konta. Spróbuj ponownie.');
       return;
     }
-    const res = await fetch('http://localhost:5000/api/bookings/lock', {
+    const res = await fetch('${API_URL}/api/bookings/lock', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

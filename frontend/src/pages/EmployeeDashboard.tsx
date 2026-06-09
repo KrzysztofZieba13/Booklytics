@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import Button from '../components/Button';
+import API_URL from '../config';
 
 interface Booking {
   _id: string;
   status: 'confirmed' | 'completed';
   startTime: string;
   endTime: string;
+  paymentMethod: 'card' | 'blik' | 'on_site' | null;
+  paymentStatus: 'pending' | 'paid';
   serviceId: { name: string; duration: number; price: number };
   clientId: { firstName: string; lastName: string; email: string; phoneNumber?: string };
 }
@@ -60,7 +63,7 @@ function BusinessPanel({ business, token, onUpdate }: {
 
   useEffect(() => {
     if (!expanded) return;
-    fetch(`http://localhost:5000/api/services/business/${business._id}`)
+    fetch(`${API_URL}/api/services/business/${business._id}`)
       .then((r) => r.json())
       .then(setServices);
   }, [expanded, business._id]);
@@ -69,7 +72,7 @@ function BusinessPanel({ business, token, onUpdate }: {
     e.preventDefault();
     setSError('');
     const t = await token();
-    const res = await fetch('http://localhost:5000/api/services', {
+    const res = await fetch('${API_URL}/api/services', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
       body: JSON.stringify({ businessId: business._id, ...sForm, price: Number(sForm.price) }),
@@ -86,7 +89,7 @@ function BusinessPanel({ business, token, onUpdate }: {
 
   const saveHours = async () => {
     const t = await token();
-    const res = await fetch(`http://localhost:5000/api/businesses/${business._id}/hours`, {
+    const res = await fetch(`${API_URL}/api/businesses/${business._id}/hours`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
       body: JSON.stringify(hForm),
@@ -211,7 +214,7 @@ function EmployeeDashboard(): React.JSX.Element {
 
   useEffect(() => {
     if (!isSignedIn || !user) return;
-    fetch(`http://localhost:5000/api/users/by-clerk/${user.id}`)
+    fetch(`${API_URL}/api/users/by-clerk/${user.id}`)
       .then((r) => r.json())
       .then((data) => setEmployeeId(data._id));
   }, [isSignedIn, user]);
@@ -219,8 +222,8 @@ function EmployeeDashboard(): React.JSX.Element {
   useEffect(() => {
     if (!employeeId) return;
     Promise.all([
-      fetch(`http://localhost:5000/api/bookings/employee/${employeeId}`).then((r) => r.json()),
-      fetch(`http://localhost:5000/api/businesses`).then((r) => r.json()),
+      fetch(`${API_URL}/api/bookings/employee/${employeeId}`).then((r) => r.json()),
+      fetch(`${API_URL}/api/businesses`).then((r) => r.json()),
     ]).then(([bookingData, bizData]) => {
       setBookings(bookingData);
       setBusinesses(bizData.filter((b: Business & { ownerId: { _id: string } }) => b.ownerId?._id === employeeId || b.ownerId === employeeId));
@@ -232,7 +235,7 @@ function EmployeeDashboard(): React.JSX.Element {
     e.preventDefault();
     setBizError('');
     const token = await getToken();
-    const res = await fetch('http://localhost:5000/api/businesses', {
+    const res = await fetch('${API_URL}/api/businesses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(bizForm),
@@ -252,7 +255,7 @@ function EmployeeDashboard(): React.JSX.Element {
   const completedBookings = bookings.filter((b) => b.status === 'completed');
 
   const complete = async (bookingId: string) => {
-    const res = await fetch(`http://localhost:5000/api/bookings/${bookingId}/complete`, { method: 'PATCH' });
+    const res = await fetch(`${API_URL}/api/bookings/${bookingId}/complete`, { method: 'PATCH' });
     if (res.ok) setBookings((prev) => prev.map((b) => b._id === bookingId ? { ...b, status: 'completed' } : b));
   };
 
@@ -317,6 +320,16 @@ function EmployeeDashboard(): React.JSX.Element {
   );
 }
 
+function PaymentBadge({ method, status }: { method: Booking['paymentMethod']; status: Booking['paymentStatus'] }) {
+  if (method === 'card' && status === 'paid')
+    return <span className="payment-badge payment-badge--paid">💳 Zapłacono kartą</span>;
+  if (method === 'blik' && status === 'paid')
+    return <span className="payment-badge payment-badge--paid">📱 Zapłacono BLIK</span>;
+  if (method === 'on_site')
+    return <span className="payment-badge payment-badge--onsite">🏠 Płaci na miejscu</span>;
+  return null;
+}
+
 function BookingCard({ booking, onComplete }: { booking: Booking; onComplete?: (id: string) => void }): React.JSX.Element {
   const { clientId: client, serviceId: service } = booking;
   return (
@@ -330,6 +343,7 @@ function BookingCard({ booking, onComplete }: { booking: Booking; onComplete?: (
         <span>{client.firstName} {client.lastName}</span>
         <span className="booking-card__meta">{client.email}{client.phoneNumber ? ` · ${client.phoneNumber}` : ''}</span>
         <span className="booking-card__meta">{service.duration} min · {service.price} zł</span>
+        <PaymentBadge method={booking.paymentMethod} status={booking.paymentStatus} />
       </div>
       <div className="booking-card__actions">
         {booking.status === 'confirmed' && onComplete && (

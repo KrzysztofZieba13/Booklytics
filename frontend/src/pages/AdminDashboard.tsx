@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Button from '../components/Button';
+import API_URL from '../config';
 
 interface User {
   _id: string;
@@ -29,7 +30,7 @@ function AdminDashboard(): React.JSX.Element {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/users')
+    fetch(`${API_URL}/api/users`)
       .then((res) => res.json())
       .then((data) => {
         setUsers(data);
@@ -42,7 +43,7 @@ function AdminDashboard(): React.JSX.Element {
   }, []);
 
   const changeRole = async (userId: string, newRole: string) => {
-    const res = await fetch(`http://localhost:5000/api/users/${userId}/role`, {
+    const res = await fetch(`${API_URL}/api/users/${userId}/role`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ role: newRole }),

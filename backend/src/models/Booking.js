@@ -9,12 +9,22 @@ const BookingSchema = new mongoose.Schema({
     startTime: { type: Date, required: true },
     endTime: { type: Date, required: true },
     
-    status: { 
-        type: String, 
-        enum: ['temporary_lock', 'confirmed', 'cancelled', 'completed'], 
-        default: 'temporary_lock' 
+    status: {
+        type: String,
+        enum: ['temporary_lock', 'confirmed', 'cancelled', 'completed'],
+        default: 'temporary_lock'
     },
-    expiresAt: { type: Date } 
+    paymentMethod: {
+        type: String,
+        enum: ['card', 'blik', 'on_site'],
+        default: null
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'paid'],
+        default: 'pending'
+    },
+    expiresAt: { type: Date }
 }, { timestamps: true });
 
 BookingSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

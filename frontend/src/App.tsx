@@ -7,6 +7,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import MyBookings from './pages/MyBookings';
 import Summary from './pages/Summary';
+import Login from './pages/Login';
 import './main.scss';
 
 function App(): React.JSX.Element {
@@ -23,6 +24,7 @@ function App(): React.JSX.Element {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/employee" element={<EmployeeDashboard />} />
             <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
         </main>
       </div>

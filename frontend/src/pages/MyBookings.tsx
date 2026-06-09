@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
+import API_URL from '../config';
 
 interface Booking {
   _id: string;
@@ -39,9 +40,9 @@ function MyBookings(): React.JSX.Element {
 
   useEffect(() => {
     if (!isSignedIn || !user) return;
-    fetch(`http://localhost:5000/api/users/by-clerk/${user.id}`)
+    fetch(`${API_URL}/api/users/by-clerk/${user.id}`)
       .then((r) => r.json())
-      .then(({ _id }) => fetch(`http://localhost:5000/api/bookings/client/${_id}`))
+      .then(({ _id }) => fetch(`${API_URL}/api/bookings/client/${_id}`))
       .then((r) => r.json())
       .then((data) => { setBookings(data); setLoading(false); });
   }, [isSignedIn, user]);

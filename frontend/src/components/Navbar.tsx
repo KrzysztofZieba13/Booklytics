@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/clerk-react';
+import API_URL from '../config';
 
 function Navbar(): React.JSX.Element {
   const { user, isSignedIn } = useUser();
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isSignedIn || !user) {
-      setRole(null);
-      return;
-    }
-    fetch(`http://localhost:5000/api/users/by-clerk/${user.id}`)
+    if (!isSignedIn) setRole(null);
+  }, [isSignedIn]);
+
+  useEffect(() => {
+    if (!isSignedIn || !user) return;
+    fetch(`${API_URL}/api/users/by-clerk/${user.id}`)
       .then((res) => res.json())
       .then((data) => setRole(data.role ?? null))
       .catch(() => setRole(null));
@@ -29,9 +31,7 @@ function Navbar(): React.JSX.Element {
       </div>
       <div className="nav-auth">
         <SignedOut>
-          <SignInButton mode="modal">
-            <button className="btn-nav-login">Zaloguj się</button>
-          </SignInButton>
+          <Link to="/login" className="btn-nav-login">Zaloguj się</Link>
         </SignedOut>
         <SignedIn>
           <UserButton afterSignOutUrl="/" />
