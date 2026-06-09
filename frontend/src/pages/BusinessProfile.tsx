@@ -77,7 +77,7 @@ function BusinessProfile(): React.JSX.Element {
       setBookingMessage('Nie znaleziono Twojego konta. Spróbuj ponownie.');
       return;
     }
-    const res = await fetch('${API_URL}/api/bookings/lock', {
+    const res = await fetch(`${API_URL}/api/bookings/lock`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

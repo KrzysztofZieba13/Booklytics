@@ -72,7 +72,7 @@ function BusinessPanel({ business, token, onUpdate }: {
     e.preventDefault();
     setSError('');
     const t = await token();
-    const res = await fetch('${API_URL}/api/services', {
+    const res = await fetch(`${API_URL}/api/services`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
       body: JSON.stringify({ businessId: business._id, ...sForm, price: Number(sForm.price) }),
@@ -235,7 +235,7 @@ function EmployeeDashboard(): React.JSX.Element {
     e.preventDefault();
     setBizError('');
     const token = await getToken();
-    const res = await fetch('${API_URL}/api/businesses', {
+    const res = await fetch(`${API_URL}/api/businesses`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(bizForm),
