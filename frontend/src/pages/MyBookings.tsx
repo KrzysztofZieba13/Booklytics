@@ -27,11 +27,6 @@ const STATUS_COLOR: Record<string, string> = {
   completed: '#94a3b8',
 };
 
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString('pl-PL', {
-    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-  });
-}
 
 function MyBookings(): React.JSX.Element {
   const { user, isSignedIn } = useUser();

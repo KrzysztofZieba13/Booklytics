@@ -226,7 +226,7 @@ function EmployeeDashboard(): React.JSX.Element {
       fetch(`${API_URL}/api/businesses`).then((r) => r.json()),
     ]).then(([bookingData, bizData]) => {
       setBookings(bookingData);
-      setBusinesses(bizData.filter((b: Business & { ownerId: { _id: string } }) => b.ownerId?._id === employeeId || b.ownerId === employeeId));
+      setBusinesses(bizData.filter((b: Business & { ownerId: { _id: string } | string }) => (typeof b.ownerId === 'string' ? b.ownerId : b.ownerId?._id) === employeeId));
       setLoading(false);
     });
   }, [employeeId]);
